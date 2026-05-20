@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCare Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-base: #f4f7f6;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #059669;
+            --primary-light: #e6f4ea;
+            --border-color: #e2e8f0;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-main); display: flex; min-height: 100vh; }
+        aside { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; padding: 24px; position: fixed; height: 100vh; z-index: 10; }
+        .brand { display: flex; align-items: center; gap: 12px; font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 32px; }
+        .brand-logo { background-color: var(--primary); color: white; padding: 8px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; }
+        .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--text-muted); text-decoration: none; font-weight: 500; border-radius: var(--radius-md); transition: all 0.2s ease; }
+        .nav-item a:hover, .nav-item.active a { background-color: var(--primary-light); color: var(--primary); }
+        .user-profile-footer { display: flex; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border-color); }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background-color: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; text-transform: uppercase; }
+        .user-info p { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+        .user-info span { font-size: 0.75rem; color: var(--text-muted); }
+        main { margin-left: 260px; flex: 1; padding: 24px 40px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .page-title h2 { font-size: 1.5rem; font-weight: 700; }
+        .page-title p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+        .btn { padding: 10px 16px; border-radius: var(--radius-md); font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { opacity: 0.9; }
+        .card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 24px; border: 1px solid rgba(226, 232, 240, 0.7); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .data-table th { padding: 16px; border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-weight: 600; font-size: 0.85rem; }
+        .data-table td { padding: 16px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+        .status-badge { padding: 4px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        .status-active { background: #dcfce7; color: #15803d; }
+        .status-pending { background: #fef9c3; color: #a16207; }
+
+        .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; }
+        .toast { background: #1e293b; color: white; padding: 14px 24px; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 500; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transform: translateX(120%); transition: transform 0.3s ease; display: flex; align-items: center; gap: 10px; }
+        .toast.show { transform: translateX(0); }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="sidebar-top">
+            <div class="brand">
+                <div class="brand-logo"><i data-lucide="activity"></i></div>
+                <span>RupamCare Pro</span>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><a href="{% url 'dashboard' %}"><i data-lucide="layout-dashboard"></i>Dashboard</a></li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'doctors_list' %}active{% endif %}"><a href="{% url 'doctors_list' %}"><i data-lucide="user-round"></i>Doctors</a></li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'patients_list' %}active{% endif %}"><a href="{% url 'patients_list' %}"><i data-lucide="users"></i>Patients</a></li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'appointments_list' %}active{% endif %}"><a href="{% url 'appointments_list' %}"><i data-lucide="calendar"></i>Appointments</a></li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'billing' %}active{% endif %}"><a href="{% url 'billing' %}"><i data-lucide="credit-card"></i>Billing & Invoices</a></li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}"><a href="{% url 'settings' %}"><i data-lucide="settings"></i>System Settings</a></li>
+            </ul>
+        </div>
+        
+        <a href="{% url 'logout' %}" style="text-decoration: none; color: inherit; display: block;">
+            <div class="user-profile-footer">
+                <div class="avatar">{{ request.user.username|slice:":2" }}</div>
+                <div class="user-info">
+                    <p>{% if request.user.first_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}</p>
+                    <span>Sign Out</span>
+                </div>
+            </div>
+        </a>
+    </aside>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function showToast(message, iconName = 'check-circle') {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'toast-container';
+                document.body.appendChild(container);
+            }
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i data-lucide="${iconName}" style="width: 18px; height: 18px; color: #10b981;"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

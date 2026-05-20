@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<header>
+    <div class="page-title">
+        <h2>Patient Directory</h2>
+        <p>Access registered patient charts, vitals records, and contact logs.</p>
+    </div>
+    <a href="{% url 'create_patient' %}" style="text-decoration: none;">
+        <button class="btn btn-primary"><i data-lucide="plus"></i>Admit New Patient</button>
+    </a>
+</header>
+
+<div class="card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Patient Name</th>
+                <th>Age</th>
+                <th>Blood Group</th>
+                <th>Address</th>
+                <th>Account Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td><strong>{{ patient.user.first_name }} {{ patient.user.last_name }}</strong></td>
+                <td>{{ patient.age }} yrs</td>
+                <td><span class="status-badge status-active" style="background:#eff6ff; color:#2563eb;">{{ patient.blood_group }}</span></td>
+                <td>{{ patient.address }}</td>
+                <td>{{ patient.user.email }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted);">No patient registries found in database records.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

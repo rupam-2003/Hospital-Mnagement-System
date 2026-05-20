@@ -1,0 +1,64 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<header>
+    <div class="page-title">
+        <h2>Appointment Schedules</h2>
+        <p>Monitor system booking requests, operational timeslots, and approval pipelines.</p>
+    </div>
+    <a href="{% url 'create_appointment' %}" style="text-decoration: none;">
+        <button class="btn btn-primary"><i data-lucide="calendar-plus"></i>Book Appointment</button>
+    </a>
+</header>
+
+<div class="card">
+    <table class="data-table">
+        <thead>
+        <thead>
+    <tr>
+        <th>Patient</th>
+        <th>Assigned Doctor</th>
+        <th>Date</th>
+        <th>Time Slot</th>
+        <th>Symptoms Description</th>
+        <th>Status</th>
+        {% if request.user.is_staff %}
+        <th>Actions</th>
+        {% endif %}
+    </tr>
+</thead>
+        <tbody>
+    {% for appointment in appointments %}
+    <tr>
+        <td><strong>{{ appointment.patient.user.first_name }} {{ appointment.patient.user.last_name }}</strong></td>
+        <td>Dr. {{ appointment.doctor.user.last_name }}</td>
+        <td>{{ appointment.date }}</td>
+        <td>{{ appointment.time_slot }}</td>
+        <td>{{ appointment.symptoms }}</td>
+        <td>
+            {% if appointment.status == 'Approved' %}
+            <span class="status-badge status-active">Approved</span>
+            {% elif appointment.status == 'Pending' %}
+            <span class="status-badge status-pending">Pending</span>
+            {% else %}
+            <span class="status-badge status-inactive">Cancelled</span>
+            {% endif %}
+        <td>
+    {% if request.user.is_staff %}
+        <a href="{% url 'edit_appointment' appointment.id %}" class="btn" style="padding: 6px 12px; background: #e2e8f0; color: var(--text-main); font-size: 0.8rem; text-decoration: none;">
+            <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i> Edit
+        </a>
+    {% else %}
+        <span style="color: var(--text-muted); font-size: 0.85rem;">View Only</span>
+    {% endif %}
+</td>
+    </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted);">No execution timelines found in database records.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

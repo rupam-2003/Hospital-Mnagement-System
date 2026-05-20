@@ -1,0 +1,177 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; gap: 20px;">
+    
+    <div style="position: relative; flex: 1; max-width: 440px;">
+        <i data-lucide="search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 18px; height: 18px;"></i>
+        <input type="text" id="dashboardSearch" onkeyup="executeLiveDashboardSearch()" placeholder="Search patients from database..." style="width: 100%; padding: 12px 14px 12px 44px; border: 1px solid var(--border-color); border-radius: var(--radius-md); outline: none; font-size: 0.9rem; background: white;">
+        
+        <div id="searchResultsDrop" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-top: 4px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); z-index: 99;"></div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="btn" style="background: white; border: 1px solid var(--border-color); color: var(--text-main);" onclick="displayLiveToastDate()">
+            <i data-lucide="calendar"></i> Today
+        </button>
+        
+        <button class="btn btn-primary" onclick="generateDynamicSummaryReport()">
+            <i data-lucide="file-plus"></i> Generate Report
+        </button>
+        
+        <div style="position: relative; cursor: pointer;" onclick="toggleNotificationDropPanel()">
+            <div style="background: white; border: 1px solid var(--border-color); padding: 12px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="bell" style="color: var(--text-main); width: 20px; height: 20px;"></i>
+                {% if unread_count > 0 %}
+                    <span id="bellAlertDot" style="position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
+                {% endif %}
+            </div>
+            
+            <div id="notificationDropdownPanel" style="display: none; position: absolute; top: 110%; right: 0; width: 320px; background: white; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 99; padding: 12px;">
+                <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <span>System Alerts Log ({{ unread_count|default:"0" }})</span>
+                    <a href="#" onclick="clearAlertLogIndicator(event)" style="font-size:0.75rem; color: var(--primary); text-decoration:none; font-weight: 500;">Clear All</a>
+                </h4>
+                <div id="notificationListContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto;">
+                    {% for alert in notifications %}
+                        <div class="alert-item" style="padding: 8px; border-radius: var(--radius-sm); background: #f8fafc; font-size: 0.8rem; border-left: 3px solid var(--primary);">
+                            <p style="font-weight:600; color: var(--text-main); display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ alert.title }}</span>
+                                <span style="font-size: 0.7rem; color: var(--text-muted);">{{ alert.created_at|date:"H:i" }}</span>
+                            </p>
+                            <span style="color: var(--text-muted); font-size:0.75rem; display: block; margin-top: 2px;">{{ alert.message }}</span>
+                        </div>
+                    {% empty %}
+                        <p style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:10px;">No outstanding alert notifications.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px;">
+    <div class="card" style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500;">Total Patients</p>
+            <h2 style="font-size: 2rem; font-weight: 700; margin-top: 4px;">{{ total_patients|default:"0" }}</h2>
+        </div>
+        <div style="background: #eff6ff; color: #2563eb; padding: 12px; border-radius: var(--radius-md);"><i data-lucide="users"></i></div>
+    </div>
+
+    <div class="card" style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500;">Active Doctors</p>
+            <h2 style="font-size: 2rem; font-weight: 700; margin-top: 4px;">{{ active_doctors|default:"0" }}</h2>
+        </div>
+        <div style="background: #e6f4ea; color: #059669; padding: 12px; border-radius: var(--radius-md);"><i data-lucide="user-check"></i></div>
+    </div>
+
+    <div class="card" style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500;">Today's Appointments</p>
+            <h2 style="font-size: 2rem; font-weight: 700; margin-top: 4px;">{{ today_appointments|default:"0" }}</h2>
+        </div>
+        <div style="background: #fff7ed; color: #ea580c; padding: 12px; border-radius: var(--radius-md);"><i data-lucide="calendar"></i></div>
+    </div>
+
+    <div class="card" style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500;">Monthly Revenue</p>
+            <h2 style="font-size: 2rem; font-weight: 700; margin-top: 4px;">$250.00</h2>
+        </div>
+        <div style="background: #f0fdf4; color: #16a34a; padding: 12px; border-radius: var(--radius-md);"><i data-lucide="credit-card"></i></div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 12px; color: var(--text-main); font-weight:700;">
+        <i data-lucide="activity" style="display:inline-block; vertical-align:middle; margin-right:6px; color:var(--primary);"></i> RupamCare Pro System Core Console
+    </h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem; line-height:1.6;">
+        All unified parameters are operating securely under corporate server protocols. Type queries into the search parameters array field above to pull instant patient details from your records, or expand the bell system alert notifications layout toolbar module to inspect your dynamic clinic event trail.
+    </p>
+</div>
+
+<script>
+    // 1. Fetch real names from database array structure context to support live query parsing
+    const systemPatientsArray = [
+        {% for patient in all_patients %}
+            "{{ patient.user.get_full_name|default:patient.user.username }}",
+        {% empty %}
+            "No registered patients available."
+        {% endfor %}
+    ];
+
+    // 2. Real-time client-side search lookup engine array filtering
+    function executeLiveDashboardSearch() {
+        const inputVal = document.getElementById('dashboardSearch').value.toLowerCase().trim();
+        const dropBox = document.getElementById('searchResultsDrop');
+        
+        if (!inputVal) {
+            dropBox.style.display = 'none';
+            return;
+        }
+
+        const filtered = systemPatientsArray.filter(p => p.toLowerCase().includes(inputVal));
+        
+        if (filtered.length > 0 && filtered[0] !== "No registered patients available.") {
+            dropBox.style.display = 'block';
+            dropBox.innerHTML = filtered.map(name => `
+                <div style="padding: 10px 14px; font-size: 0.85rem; border-bottom: 1px solid var(--border-color); cursor: pointer;" onclick="selectPatientSearchResult('${name}')">
+                    <i data-lucide="user" style="width:14px; height:14px; display:inline-block; margin-right:6px; color:var(--primary);"></i> ${name}
+                </div>
+            `).join('');
+            lucide.createIcons();
+        } else {
+            dropBox.style.display = 'block';
+            dropBox.innerHTML = `<div style="padding: 10px 14px; font-size: 0.85rem; color:var(--text-muted);">No matching patients found</div>`;
+        }
+    }
+
+    function selectPatientSearchResult(name) {
+        document.getElementById('dashboardSearch').value = name;
+        document.getElementById('searchResultsDrop').style.display = 'none';
+        showToast(`Viewing dynamic records profile for: ${name}`, 'user');
+    }
+
+    // FIXED: Formats date natively via JavaScript to avoid Django template single/double quote clashing completely
+    function displayLiveToastDate() {
+        const options = { month: 'long', day: 'numeric', year: 'numeric' };
+        const todayDate = new Date().toLocaleDateString('en-US', options);
+        showToast("Current System Time: " + todayDate, "calendar");
+    }
+
+    // 3. Dynamic Executive Summary Report Generator File Downloader Module
+    function generateDynamicSummaryReport() {
+        showToast('Compiling analytical server data matrices...', 'loader');
+        
+        const options = { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+        const currentTimestamp = new Date().toLocaleDateString('en-US', options);
+
+        setTimeout(() => {
+            const docContent = `RUPAMCARE PRO SYSTEM HEALTH EXECUTIVE SUMMARY\n==============================================\nGenerated Timestamp: ${currentTimestamp}\nSystem Operator Access Name: {{ request.user.get_full_name }}\n\nACTIVE REGISTERED INFRASTRUCTURE COUNTS:\n----------------------------------------------\n - Total Registered Patients Logs: {{ total_patients|default:"0" }}\n - Active On-Duty Authorized Doctors: {{ active_doctors|default:"0" }}\n - Today's Active Calendar Appointment Load: {{ today_appointments|default:"0" }}\n\nApplication Verification Verification Status: 100% SECURE & ACTIVE`;
+            const a = document.createElement('a');
+            a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(docContent);
+            a.download = 'rupamcare_executive_summary.txt';
+            a.click();
+            showToast('Executive summary report downloaded successfully.');
+        }, 800);
+    }
+
+    // 4. Panel Visibility Toggle Engines
+    function toggleNotificationDropPanel() {
+        const panel = document.getElementById('notificationDropdownPanel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function clearAlertLogIndicator(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        document.getElementById('notificationListContainer').innerHTML = `<p style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:10px;">No outstanding alert notifications.</p>`;
+        const dot = document.getElementById('bellAlertDot');
+        if(dot) dot.style.display = 'none';
+        showToast('System notification logs cleared.');
+    }
+</script>
+{% endblock %}

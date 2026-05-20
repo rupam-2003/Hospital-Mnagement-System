@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCare Pro - Staff Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #f4f7f6;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --primary: #059669;
+            --border-color: #e2e8f0;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-container { background: var(--bg-card); border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 420px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .login-header { margin-bottom: 24px; text-align: center; }
+        .login-header h2 { font-size: 1.6rem; font-weight: 700; color: var(--text-main); }
+        .login-header p { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
+        .error-box { background: #fee2e2; color: #b91c1c; padding: 12px; border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 500; margin-bottom: 16px; text-align: center; }
+        form { display: flex; flex-direction: column; gap: 16px; }
+        form p { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; font-weight: 600; }
+        form input { padding: 12px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-md); outline: none; font-size: 0.9rem; }
+        form input:focus { border-color: var(--primary); }
+        .btn-submit { background: var(--primary); color: white; padding: 14px; border: none; border-radius: var(--radius-md); font-weight: 600; font-size: 1rem; cursor: pointer; transition: opacity 0.2s; margin-top: 8px; }
+        .btn-submit:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="login-header">
+            <h2>Staff Portal Sign In</h2>
+            <p>Please enter your hospital employee credentials.</p>
+        </div>
+
+        {% if error %}
+        <div class="error-box">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn-submit">Sign In to Dashboard</button>
+        </form>
+    </div>
+
+</body>
+</html>
