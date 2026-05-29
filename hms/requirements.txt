@@ -1,1 +1,4 @@
-
+Django
+gunicorn
+whitenoise
+pillow
